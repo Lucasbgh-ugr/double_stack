@@ -270,11 +270,24 @@ public:
    * @pre num_pila es NUM_PILA_FIRST o NUM_PILA_SECOND.
    * @post Este objeto no cambia.
    */
-  [[nodiscard]] std::stack<T> copy_stack(int num_pila) const;
+  [[nodiscard]] std::stack<T> copyStack(int num_pila) const;
 
   // ---------------------------------------------------------------------------
   // Modificadores
   // ---------------------------------------------------------------------------
+
+  /**
+   * @brief Sustituye una pila por el contenido de otra std::stack.
+   *
+   * @tparam StackContainer Contenedor subyacente de la pila recibida.
+   * @param num_pila Identificador de la pila que se sustituye.
+   * @param stack Pila cuyo contenido se copia o se traslada.
+   * @pre num_pila es NUM_PILA_FIRST o NUM_PILA_SECOND.
+   * @post La otra pila de este objeto no cambia.
+   */
+  template <typename StackContainer>
+  constexpr void setStack(int num_pila,
+                          std::stack<T, StackContainer> stack);
 
   /**
    * @brief Inserta una copia del valor en una pila.
@@ -355,19 +368,19 @@ private:
    * @param first Pila de la que se copian los elementos.
    */
   template <typename StackContainer>
-  constexpr void ConstructFirst(std::stack<T, StackContainer> first);
+  constexpr void constructFirst(std::stack<T, StackContainer> first);
 
   /**
    * @brief Inicializa la primera pila desde una lista.
    * @param first Elementos que se copian.
    */
-  constexpr void ConstructFirst(std::initializer_list<T> first);
+  constexpr void constructFirst(std::initializer_list<T> first);
 
   /**
    * @brief Inicializa la primera pila desde un vector.
    * @param first Vector cuyos elementos se trasladan.
    */
-  constexpr void ConstructFirst(container_type first);
+  constexpr void constructFirst(container_type first);
 
   /**
    * @brief Inicializa la primera pila desde un rango de iteradores.
@@ -375,26 +388,26 @@ private:
    * @param first_1 Inicio del rango.
    * @param last_1 Fin del rango.
    */
-  template <typename It> constexpr void ConstructFirst(It first_1, It last_1);
+  template <typename It> constexpr void constructFirst(It first_1, It last_1);
 
   /**
    * @brief Inicializa la segunda pila desde un objeto std::stack.
    * @param second Pila de la que se copian los elementos.
    */
   template <typename StackContainer>
-  constexpr void ConstructSecond(std::stack<T, StackContainer> second);
+  constexpr void constructSecond(std::stack<T, StackContainer> second);
 
   /**
    * @brief Inicializa la segunda pila desde una lista.
    * @param second Elementos que se copian.
    */
-  constexpr void ConstructSecond(std::initializer_list<T> second);
+  constexpr void constructSecond(std::initializer_list<T> second);
 
   /**
    * @brief Inicializa la segunda pila desde un vector.
    * @param second Vector cuyos elementos se trasladan.
    */
-  constexpr void ConstructSecond(container_type second);
+  constexpr void constructSecond(container_type second);
 
   /**
    * @brief Inicializa la segunda pila desde un rango de iteradores.
@@ -402,26 +415,26 @@ private:
    * @param first_2 Inicio del rango.
    * @param last_2 Fin del rango.
    */
-  template <typename It> constexpr void ConstructSecond(It first_2, It last_2);
+  template <typename It> constexpr void constructSecond(It first_2, It last_2);
 
   /**
    * @brief Reserva el espacio inicial para la primera pila.
    * @param first Número de elementos que tendrá la primera pila.
    */
-  constexpr void PrepareFirst(size_type first);
+  constexpr void prepareFirst(size_type first);
 
   /**
    * @brief Reserva espacio para ambas pilas, redondeando a potencia de dos.
    * @param second Número de elementos que tendrá la segunda pila.
    */
-  constexpr void PrepareSecond(size_type second);
+  constexpr void prepareSecond(size_type second);
 
   /**
    * @brief Devuelve la potencia de dos igual o superior al valor indicado.
    * @param num Valor que se redondea.
    * @return Potencia de dos calculada.
    */
-  constexpr size_type UpperTwoPower(size_type num) const noexcept;
+  constexpr size_type upperTwoPower(size_type num) const noexcept;
 };
 
 /**
