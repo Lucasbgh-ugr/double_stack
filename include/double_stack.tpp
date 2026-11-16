@@ -14,8 +14,8 @@ template <typename T>
 constexpr double_stack<T>::double_stack(std::initializer_list<T> first,
                                         std::initializer_list<T> second)
     : data_() {
-  ConstructFirst(first);
-  ConstructSecond(second);
+  constructFirst(first);
+  constructSecond(second);
 }
 
 template <typename T>
@@ -26,8 +26,8 @@ template <typename Second>
 constexpr double_stack<T>::double_stack(std::initializer_list<T> first,
                                         Second&& second)
     : data_() {
-  ConstructFirst(first);
-  ConstructSecond(std::forward<Second>(second));
+  constructFirst(first);
+  constructSecond(std::forward<Second>(second));
 }
 
 template <typename T>
@@ -38,8 +38,8 @@ template <typename First>
 constexpr double_stack<T>::double_stack(First&& first,
                                         std::initializer_list<T> second)
     : data_() {
-  ConstructFirst(std::forward<First>(first));
-  ConstructSecond(second);
+  constructFirst(std::forward<First>(first));
+  constructSecond(second);
 }
 
 template <typename T>
@@ -49,8 +49,8 @@ template <typename T>
 template <typename First, typename Second>
 constexpr double_stack<T>::double_stack(First&& first, Second&& second)
     : data_() {
-  ConstructFirst(std::forward<First>(first));
-  ConstructSecond(std::forward<Second>(second));
+  constructFirst(std::forward<First>(first));
+  constructSecond(std::forward<Second>(second));
 }
 
 template <typename T>
@@ -61,8 +61,8 @@ template <typename It, typename Second>
 constexpr double_stack<T>::double_stack(It first_begin, It first_end,
                                         Second&& second)
     : data_() {
-  ConstructFirst(first_begin, first_end);
-  ConstructSecond(std::forward<Second>(second));
+  constructFirst(first_begin, first_end);
+  constructSecond(std::forward<Second>(second));
 }
 
 template <typename T>
@@ -73,8 +73,8 @@ template <typename It>
 constexpr double_stack<T>::double_stack(It first_begin, It first_end,
                                         std::initializer_list<T> second)
     : data_() {
-  ConstructFirst(first_begin, first_end);
-  ConstructSecond(second);
+  constructFirst(first_begin, first_end);
+  constructSecond(second);
 }
 
 template <typename T>
@@ -85,8 +85,8 @@ template <typename First, typename It>
 constexpr double_stack<T>::double_stack(First&& first, It second_begin,
                                         It second_end)
     : data_() {
-  ConstructFirst(std::forward<First>(first));
-  ConstructSecond(second_begin, second_end);
+  constructFirst(std::forward<First>(first));
+  constructSecond(second_begin, second_end);
 }
 
 template <typename T>
@@ -97,8 +97,8 @@ template <typename It>
 constexpr double_stack<T>::double_stack(std::initializer_list<T> first,
                                         It second_begin, It second_end)
     : data_() {
-  ConstructFirst(first);
-  ConstructSecond(second_begin, second_end);
+  constructFirst(first);
+  constructSecond(second_begin, second_end);
 }
 
 template <typename T>
@@ -109,8 +109,8 @@ template <typename It1, typename It2>
 constexpr double_stack<T>::double_stack(It1 first_begin, It1 first_end,
                                         It2 second_begin, It2 second_end)
     : data_() {
-  ConstructFirst(first_begin, first_end);
-  ConstructSecond(second_begin, second_end);
+  constructFirst(first_begin, first_end);
+  constructSecond(second_begin, second_end);
 }
 
 template <typename T>
@@ -201,7 +201,7 @@ template <typename T>
   requires std::is_default_constructible_v<T> &&
            std::is_move_constructible_v<T> && std::is_copy_assignable_v<T> &&
            std::is_move_assignable_v<T>
-std::stack<T> double_stack<T>::copy_stack(int num_pila) const {
+std::stack<T> double_stack<T>::copyStack(int num_pila) const {
   assert(num_pila == NUM_PILA_FIRST || num_pila == NUM_PILA_SECOND);
 
   std::stack<T> stack_copy;
@@ -222,12 +222,62 @@ template <typename T>
   requires std::is_default_constructible_v<T> &&
            std::is_move_constructible_v<T> && std::is_copy_assignable_v<T> &&
            std::is_move_assignable_v<T>
+template <typename StackContainer>
+constexpr void
+double_stack<T>::setStack(int num_pila,
+                          std::stack<T, StackContainer> stack) {
+  assert(num_pila == NUM_PILA_FIRST || num_pila == NUM_PILA_SECOND);
+
+  double_stack replacement;
+  replacement.size_first_ =
+      num_pila == NUM_PILA_FIRST ? stack.size() : size_first_;
+  replacement.size_second_ =
+      num_pila == NUM_PILA_SECOND ? stack.size() : size_second_;
+  replacement.data_.resize(
+      replacement.upperTwoPower(replacement.size_first_ +
+                                replacement.size_second_));
+
+  if (num_pila == NUM_PILA_FIRST) {
+    const size_type second_begin = data_.size() - size_second_;
+    const size_type replacement_second_begin =
+        replacement.data_.size() - size_second_;
+    for (size_type i = 0; i < size_second_; ++i) {
+      replacement.data_[replacement_second_begin + i] =
+          data_[second_begin + i];
+    }
+
+    size_type first_index = replacement.size_first_;
+    while (!stack.empty()) {
+      replacement.data_[--first_index] = std::move(stack.top());
+      stack.pop();
+    }
+  } else {
+    for (size_type i = 0; i < size_first_; ++i) {
+      replacement.data_[i] = data_[i];
+    }
+
+    size_type second_index =
+        replacement.data_.size() - replacement.size_second_;
+    while (!stack.empty()) {
+      replacement.data_[second_index] = std::move(stack.top());
+      stack.pop();
+      ++second_index;
+    }
+  }
+
+  swap(replacement);
+}
+
+template <typename T>
+  requires std::is_default_constructible_v<T> &&
+           std::is_move_constructible_v<T> && std::is_copy_assignable_v<T> &&
+           std::is_move_assignable_v<T>
 constexpr void double_stack<T>::push(const value_type& value, int num_pila) {
   assert(num_pila == NUM_PILA_FIRST || num_pila == NUM_PILA_SECOND);
   value_type staged(value);
   if (size_first_ + size_second_ == data_.size()) {
     const size_type old_size = data_.size();
-    data_.resize(UpperTwoPower(size_first_ + size_second_ + 1));
+    data_.resize(upperTwoPower(size_first_ + size_second_ + 1));
     std::move_backward(data_.begin() + old_size - size_second_,
                        data_.begin() + old_size, data_.end());
   }
@@ -250,7 +300,7 @@ constexpr void double_stack<T>::push(value_type&& value, int num_pila) {
   value_type staged(std::move(value));
   if (size_first_ + size_second_ == data_.size()) {
     const size_type old_size = data_.size();
-    data_.resize(UpperTwoPower(size_first_ + size_second_ + 1));
+    data_.resize(upperTwoPower(size_first_ + size_second_ + 1));
     std::move_backward(data_.begin() + old_size - size_second_,
                        data_.begin() + old_size, data_.end());
   }
@@ -338,8 +388,8 @@ template <typename T>
            std::is_move_assignable_v<T>
 template <typename StackContainer>
 constexpr void
-double_stack<T>::ConstructFirst(std::stack<T, StackContainer> first) {
-  PrepareFirst(first.size());
+double_stack<T>::constructFirst(std::stack<T, StackContainer> first) {
+  prepareFirst(first.size());
 
   size_type first_index = size_first_;
   while (!first.empty()) {
@@ -353,8 +403,8 @@ template <typename T>
   requires std::is_default_constructible_v<T> &&
            std::is_move_constructible_v<T> && std::is_copy_assignable_v<T> &&
            std::is_move_assignable_v<T>
-constexpr void double_stack<T>::ConstructFirst(std::initializer_list<T> first) {
-  PrepareFirst(first.size());
+constexpr void double_stack<T>::constructFirst(std::initializer_list<T> first) {
+  prepareFirst(first.size());
   std::copy(first.begin(), first.end(), data_.begin());
 }
 
@@ -362,8 +412,8 @@ template <typename T>
   requires std::is_default_constructible_v<T> &&
            std::is_move_constructible_v<T> && std::is_copy_assignable_v<T> &&
            std::is_move_assignable_v<T>
-constexpr void double_stack<T>::ConstructFirst(container_type first) {
-  PrepareFirst(first.size());
+constexpr void double_stack<T>::constructFirst(container_type first) {
+  prepareFirst(first.size());
   std::move(first.begin(), first.end(), data_.begin());
 }
 
@@ -372,9 +422,9 @@ template <typename T>
            std::is_move_constructible_v<T> && std::is_copy_assignable_v<T> &&
            std::is_move_assignable_v<T>
 template <typename It>
-constexpr void double_stack<T>::ConstructFirst(It first_1, It last_1) {
+constexpr void double_stack<T>::constructFirst(It first_1, It last_1) {
   container_type values(first_1, last_1);
-  ConstructFirst(std::move(values));
+  constructFirst(std::move(values));
 }
 
 template <typename T>
@@ -383,8 +433,8 @@ template <typename T>
            std::is_move_assignable_v<T>
 template <typename StackContainer>
 constexpr void
-double_stack<T>::ConstructSecond(std::stack<T, StackContainer> second) {
-  PrepareSecond(second.size());
+double_stack<T>::constructSecond(std::stack<T, StackContainer> second) {
+  prepareSecond(second.size());
 
   size_type second_index = data_.size() - size_second_;
   while (!second.empty()) {
@@ -399,17 +449,20 @@ template <typename T>
            std::is_move_constructible_v<T> && std::is_copy_assignable_v<T> &&
            std::is_move_assignable_v<T>
 constexpr void
-double_stack<T>::ConstructSecond(std::initializer_list<T> second) {
-  PrepareSecond(second.size());
-  std::copy(second.begin(), second.end(), data_.begin() + size_first_);
+double_stack<T>::constructSecond(std::initializer_list<T> second) {
+  prepareSecond(second.size());
+  size_type second_index = size_first_;
+  for (const T& value : second) {
+    data_[second_index++] = value;
+  }
 }
 
 template <typename T>
   requires std::is_default_constructible_v<T> &&
            std::is_move_constructible_v<T> && std::is_copy_assignable_v<T> &&
            std::is_move_assignable_v<T>
-constexpr void double_stack<T>::ConstructSecond(container_type second) {
-  PrepareSecond(second.size());
+constexpr void double_stack<T>::constructSecond(container_type second) {
+  prepareSecond(second.size());
   std::move(std::begin(second), std::end(second), data_.rbegin());
 }
 
@@ -418,16 +471,16 @@ template <typename T>
            std::is_move_constructible_v<T> && std::is_copy_assignable_v<T> &&
            std::is_move_assignable_v<T>
 template <typename It>
-constexpr void double_stack<T>::ConstructSecond(It first_2, It last_2) {
+constexpr void double_stack<T>::constructSecond(It first_2, It last_2) {
   container_type values(first_2, last_2);
-  ConstructSecond(std::move(values));
+  constructSecond(std::move(values));
 }
 
 template <typename T>
   requires std::is_default_constructible_v<T> &&
            std::is_move_constructible_v<T> && std::is_copy_assignable_v<T> &&
            std::is_move_assignable_v<T>
-constexpr void double_stack<T>::PrepareFirst(size_type first) {
+constexpr void double_stack<T>::prepareFirst(size_type first) {
   size_first_ = first;
   data_.resize(size_first_);
 }
@@ -436,11 +489,11 @@ template <typename T>
   requires std::is_default_constructible_v<T> &&
            std::is_move_constructible_v<T> && std::is_copy_assignable_v<T> &&
            std::is_move_assignable_v<T>
-constexpr void double_stack<T>::PrepareSecond(size_type second) {
+constexpr void double_stack<T>::prepareSecond(size_type second) {
   size_second_ = second;
 
   size_type size_total = size_first_ + size_second_;
-  size_type size_resize = UpperTwoPower(size_total);
+  size_type size_resize = upperTwoPower(size_total);
   data_.resize(size_resize);
 }
 
@@ -449,7 +502,7 @@ template <typename T>
            std::is_move_constructible_v<T> && std::is_copy_assignable_v<T> &&
            std::is_move_assignable_v<T>
 constexpr typename double_stack<T>::size_type
-double_stack<T>::UpperTwoPower(size_type num) const noexcept {
+double_stack<T>::upperTwoPower(size_type num) const noexcept {
   const size_type highest_power_of_two =
       std::bit_floor(std::numeric_limits<size_type>::max());
   if (num > highest_power_of_two) {
