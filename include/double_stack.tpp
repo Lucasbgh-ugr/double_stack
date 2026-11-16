@@ -336,7 +336,9 @@ template <typename T>
   requires std::is_default_constructible_v<T> &&
            std::is_move_constructible_v<T> && std::is_copy_assignable_v<T> &&
            std::is_move_assignable_v<T>
-constexpr void double_stack<T>::ConstructFirst(std::stack<T> first) {
+template <typename StackContainer>
+constexpr void
+double_stack<T>::ConstructFirst(std::stack<T, StackContainer> first) {
   PrepareFirst(first.size());
 
   size_type first_index = size_first_;
@@ -379,7 +381,9 @@ template <typename T>
   requires std::is_default_constructible_v<T> &&
            std::is_move_constructible_v<T> && std::is_copy_assignable_v<T> &&
            std::is_move_assignable_v<T>
-constexpr void double_stack<T>::ConstructSecond(std::stack<T> second) {
+template <typename StackContainer>
+constexpr void
+double_stack<T>::ConstructSecond(std::stack<T, StackContainer> second) {
   PrepareSecond(second.size());
 
   size_type second_index = data_.size() - size_second_;

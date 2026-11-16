@@ -354,7 +354,8 @@ private:
    * @brief Inicializa la primera pila desde un objeto std::stack.
    * @param first Pila de la que se copian los elementos.
    */
-  constexpr void ConstructFirst(std::stack<T> first);
+  template <typename StackContainer>
+  constexpr void ConstructFirst(std::stack<T, StackContainer> first);
 
   /**
    * @brief Inicializa la primera pila desde una lista.
@@ -380,7 +381,8 @@ private:
    * @brief Inicializa la segunda pila desde un objeto std::stack.
    * @param second Pila de la que se copian los elementos.
    */
-  constexpr void ConstructSecond(std::stack<T> second);
+  template <typename StackContainer>
+  constexpr void ConstructSecond(std::stack<T, StackContainer> second);
 
   /**
    * @brief Inicializa la segunda pila desde una lista.
