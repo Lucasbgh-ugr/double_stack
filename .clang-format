@@ -1,0 +1,11 @@
+Language: Cpp
+# Puedes basarte en un estilo estándar (LLVM, Google, Mozilla, Microsoft)
+BasedOnStyle: LLVM 
+
+# Pega el * al tipo (int* a;)
+PointerAlignment: Left 
+
+# Pega el & al tipo (int& a;)
+ReferenceAlignment: Left  
+
+StatementMacros: ['EIGEN_MAKE_ALIGNED_OPERATOR_NEW']
