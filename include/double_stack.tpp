@@ -451,7 +451,7 @@ template <typename T>
 constexpr void
 double_stack<T>::constructSecond(std::initializer_list<T> second) {
   prepareSecond(second.size());
-  size_type second_index = size_first_;
+  size_type second_index = data_.size() - size_second_;
   for (const T& value : second) {
     data_[second_index++] = value;
   }
